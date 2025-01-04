@@ -1,5 +1,22 @@
 <script setup>
+import axios from "axios";
 import Task from './components/Task.vue';
+import { ref, onMounted } from "vue";
+
+const tasks = ref([]);
+
+const fetchTasks = async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/tasks");
+    tasks.value = response.data;
+  } catch (error) {
+    console.error("Greska u dohvacanju", error);
+  }
+};
+
+onMounted(() => {
+  fetchTasks();
+});
 </script>
 
 <template>
@@ -19,7 +36,12 @@ import Task from './components/Task.vue';
     <div class="bg-white p-4 shadow rounded-md">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Vaši zadaci</h2>
       <ul class="space-y-4">
-        <Task naslov="Naslov zadatka" opis="Opis zadatka" />
+        <Task
+          v-for="task in tasks"
+          :key="task.id"
+          :naslov="task.naslov"
+          :opis="task.opis"
+        />
       </ul>
     </div>
   </div>
