@@ -1,13 +1,8 @@
 import express from "express";
 import { connectToDatabase } from "../db.js";
+import { ObjectId } from "mongodb";
 
 const router = express.Router();
-
-let tasks = [
-    { id: 1, naslov: "Kupiti kruh", opis: "Idi kupiti kruh danas", zavrsen: false },
-    { id: 2, naslov: "Naučiti Vue.js", opis: "Prouči malo Vue.js dokumentaciju", zavrsen: false },
-    { id: 3, naslov: "Riješi zadaću iz UPP-a", opis: "Natjeraj se riješiti zadaću!", zavrsen: false },
-];
 
 router.get("/", async (req, res) => {
     try {
@@ -17,7 +12,7 @@ router.get("/", async (req, res) => {
       res.json(tasks);
     } catch (error) {
       console.error("Greska u dohvacanju", error);
-      res.status(500).send("Greska u dphvacanju.");
+      res.status(500).send("Greska u dohvacanju.");
     }
 });
 
@@ -45,6 +40,28 @@ router.post("/", async (req, res) => {
       console.error("Greska u dodavanju", error);
       res.status(500).send("Greska u dodavanju.");
     }
-  });
+});
+
+router.patch("/:id", async (req, res) => {
+    try {
+      const db = await connectToDatabase();
+      const collection = db.collection("tasks");
+      const taskId = req.params.id;
+  
+      const result = await collection.updateOne(
+        { _id: new ObjectId(taskId) },
+        { $set: { zavrsen: true } }
+      );
+  
+      if (result.modifiedCount === 0) {
+        return res.status(404).json({ error: "Nije pronadjen" });
+      }
+  
+      res.status(200).json({ message: "Azuriran" });
+    } catch (error) {
+      console.error("Greska u azuriranju", error);
+      res.status(500).send("Greska u azuriranju");
+    }
+});
   
 export default router;

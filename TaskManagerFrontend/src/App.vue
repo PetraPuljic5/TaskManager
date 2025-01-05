@@ -38,10 +38,12 @@ onMounted(() => {
       <ul class="space-y-4">
         <Task
           v-for="task in tasks"
-          :key="task.id"
+          :key="task._id.toString()"
+          :id="task._id.toString()"
           :naslov="task.naslov"
           :opis="task.opis"
           :tags="task.tags"
+          :zavrsen="task.zavrsen"
         />
       </ul>
     </div>
