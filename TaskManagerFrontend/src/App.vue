@@ -41,6 +41,7 @@ onMounted(() => {
           :key="task.id"
           :naslov="task.naslov"
           :opis="task.opis"
+          :tags="task.tags"
         />
       </ul>
     </div>

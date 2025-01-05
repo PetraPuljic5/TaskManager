@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
         return res.status(400).json({ error: "Nije polje." });
       }
       for (const task of tasks) {
-        if (!task.naslov || !task.opis || typeof task.zavrsen !== "boolean") {
+        if (!task.naslov || !task.opis || typeof task.zavrsen !== "boolean" || !Array.isArray(task.tags)) {
           return res
             .status(400)
             .json({ error: "Nedostaju podaci" });
