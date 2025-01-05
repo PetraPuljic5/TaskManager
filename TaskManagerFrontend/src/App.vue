@@ -14,6 +14,10 @@ const fetchTasks = async () => {
   }
 };
 
+const ukloniZadatak = (id) => {
+  tasks.value = tasks.value.filter(task => task._id.toString() !== id);
+};
+
 onMounted(() => {
   fetchTasks();
 });
@@ -44,6 +48,7 @@ onMounted(() => {
           :opis="task.opis"
           :tags="task.tags"
           :zavrsen="task.zavrsen"
+          @obrisiZadatak="ukloniZadatak"
         />
       </ul>
     </div>

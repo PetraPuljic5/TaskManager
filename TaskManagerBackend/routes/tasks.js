@@ -63,5 +63,24 @@ router.patch("/:id", async (req, res) => {
       res.status(500).send("Greska u azuriranju");
     }
 });
+
+router.delete("/:id", async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        const collection = db.collection("tasks");
+        const taskId = req.params.id;
+
+        const result = await collection.deleteOne({ _id: new ObjectId(taskId) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Nije pronadjen" });
+        }
+
+        res.status(200).json({ message: "Obrisan" });
+    } catch (error) {
+        console.error("Greska u brisanju", error);
+        res.status(500).json({ error: "Greska u azuriranju" });
+    }
+});
   
 export default router;

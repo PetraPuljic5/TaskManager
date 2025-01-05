@@ -25,6 +25,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["obrisiZadatak"]);
+
 const isZavrsen = ref(props.zavrsen);
 
 const oznaciZavrsen = async () => {
@@ -39,6 +41,25 @@ const oznaciZavrsen = async () => {
       isZavrsen.value = true;
     } else {
       console.error("Greska u azuriranju");
+    }
+  } catch (error) {
+    console.error("Greska", error);
+  }
+};
+
+const obrisiZadatak = async () => {
+  if (!confirm("Zelite li obrisati zadatak?")) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/tasks/${props.id}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      console.log("Zadatak obrisan");
+      emit("obrisiZadatak", props.id); 
+    } else {
+      console.error("Greska u brisanju zadatka");
     }
   } catch (error) {
     console.error("Greska", error);
@@ -67,6 +88,7 @@ const oznaciZavrsen = async () => {
         Dovršeno
       </button>
       <button
+        @click="obrisiZadatak"
         class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
       >
         Obriši
