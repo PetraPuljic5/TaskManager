@@ -79,7 +79,7 @@ router.delete("/:id", async (req, res) => {
         res.status(200).json({ message: "Obrisan" });
     } catch (error) {
         console.error("Greska u brisanju", error);
-        res.status(500).json({ error: "Greska u azuriranju" });
+        res.status(500).json({ error: "Greska u brisanju" });
     }
 });
   
