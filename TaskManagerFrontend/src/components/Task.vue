@@ -2,7 +2,7 @@
 import TaskTag from "./TaskTag.vue";
 import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
   id: {
     type: String,
     required: true,
@@ -25,15 +25,18 @@ defineProps({
   },
 });
 
+const isZavrsen = ref(props.zavrsen);
+
 const oznaciZavrsen = async () => {
   try {
-    const response = await fetch(`/tasks/${id}`, {
+    const response = await fetch(`http://localhost:8000/tasks/${props.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
     });
+
     if (response.ok) {
       console.log("Oznacen kao dovrsen");
-      zavrsen.value = true;
+      isZavrsen.value = true;
     } else {
       console.error("Greska u azuriranju");
     }
@@ -45,7 +48,7 @@ const oznaciZavrsen = async () => {
 
 <template>
   <li
-    :class="['flex flex-col p-4 rounded-md shadow', zavrsen ? 'bg-green-100' : 'bg-gray-50']"
+    :class="['flex flex-col p-4 rounded-md shadow', isZavrsen ? 'bg-green-100' : 'bg-gray-50']"
   >
     <div class="mb-2">
       <p class="text-lg font-medium text-gray-800">{{ naslov }}</p>
@@ -57,7 +60,7 @@ const oznaciZavrsen = async () => {
     <!-- Task Actions -->
     <div class="flex space-x-2">
       <button
-        v-if="!zavrsen"
+        v-if="!isZavrsen"
         @click="oznaciZavrsen"
         class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
       >
