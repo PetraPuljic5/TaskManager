@@ -11,7 +11,10 @@
             <label for="password" class="block text-gray-700 font-medium mb-2">Lozinka:</label>
             <input id="password" v-model="password" type="password" class="w-full px-3 py-2 border rounded-md shadow-sm" required>
           </div>
+          <div class="flex justify-end space-x-4">
           <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Registriraj se</button>
+          <button type="button" @click="closeForm" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Odustani</button>
+          </div>
         </form>
       </div>
     </div>
@@ -19,10 +22,11 @@
   
 <script setup>
 import axios from 'axios';
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
   
 const username = ref('');
 const password = ref('');
+const emit = defineEmits(['close']);
   
 const register = async () => {
     try {
@@ -33,9 +37,14 @@ const register = async () => {
       alert('Uspjesna registracija');
       username.value = '';
       password.value = '';
+      emit('close');
     } catch (error) {
       alert('Neuspjesna registracija: ' + error.response.data.error);
     }
+};
+
+const closeForm = () => {
+    emit('close');
 };
 </script>
 <style scoped>

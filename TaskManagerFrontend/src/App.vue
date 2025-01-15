@@ -69,7 +69,7 @@ onMounted(() => {
     </header>
 
     <!-- Registration Form -->
-    <Registracija v-if="showRegistracijaForm" />
+    <Registracija v-if="showRegistracijaForm" @close="showRegistracijaForm = false" />
 
     <!-- New Task Form -->
     <div v-if="showNoviTaskForm" class="bg-white p-4 shadow rounded-md mb-6">
