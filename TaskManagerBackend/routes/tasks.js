@@ -1,14 +1,20 @@
 import express from "express";
 import { connectToDatabase } from "../db.js";
 import { ObjectId } from "mongodb";
+import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
-        const tasks = await collection.find({}).toArray();
+        const tasks = await collection.find({ userId: req.userId }).toArray();
+
+        if (tasks.length === 0) {
+            return res.status(404).json({ error: "Nema zadataka za ovog korisnika" });
+        }
+
         res.json(tasks);
     } catch (error) {
         console.error("Greska u dohvacanju", error);
@@ -98,7 +104,7 @@ router.post("/novi", async (req, res) => {
             opis,
             tags,
             zavrsen: false,
-            userId
+            userId: new ObjectId(userId),
         };
 
         const result = await collection.insertOne(noviTask);
