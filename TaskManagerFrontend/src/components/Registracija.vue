@@ -34,12 +34,15 @@ const register = async () => {
         username: username.value,
         password: password.value
       });
-      alert('Uspjesna registracija');
+
+      const userId = response.data.userId;
+      localStorage.setItem('userId', userId);
+      alert('Uspješna registracija');
       username.value = '';
       password.value = '';
       emit('close');
     } catch (error) {
-      alert('Neuspjesna registracija: ' + error.response.data.error);
+      alert('Neuspješna registracija: ' + error.response.data?.error || error.message);
     }
 };
 

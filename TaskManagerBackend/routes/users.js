@@ -25,8 +25,12 @@ router.post('/register', async (req, res) => {
       password: hashedPassword
     };
 
-    await users.insertOne(noviUser);
-    res.status(201).json({ message: 'KUspjesno registriran' });
+    const result = await users.insertOne(noviUser);
+
+    res.status(201).json({ 
+        message: 'KUspjesno registriran',
+        userId: result.insertedId
+    });
   } catch (error) {
     console.error('Greska u registraciji', error);
     res.status(500).json({ error: 'Greska u registraciji' });

@@ -22,26 +22,37 @@ const fetchTasks = async () => {
 
 const addTask = async () => {
     if (!noviTaskNaslov.value.trim() || !noviTaskOpis.value.trim()) {
-        alert("Naslov i opis su obavezni.");
+        alert("Naslov i opis su obavezni");
         return;
     }
 
     const tagsArray = noviTaskTags.value.split(",").map(tag => tag.trim());
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+        alert("Korisnik nije prijavljen");
+        return;
+    }
 
     try {
         const response = await axios.post("http://localhost:8000/tasks/novi", {
             naslov: noviTaskNaslov.value,
             opis: noviTaskOpis.value,
             tags: tagsArray,
+            userId: userId
         });
         tasks.value.unshift(response.data);
-        noviTaskNaslov.value = "";
-        noviTaskOpis.value = "";
-        noviTaskTags.value = "";
+        resetTaskForm();
         showNoviTaskForm.value = false;
     } catch (error) {
         console.error("Greška u dodavanju zadatka", error);
     }
+};
+
+const resetTaskForm = () => {
+    noviTaskNaslov.value = "";
+    noviTaskOpis.value = "";
+    noviTaskTags.value = "";
 };
 
 const ukloniZadatak = (id) => {
