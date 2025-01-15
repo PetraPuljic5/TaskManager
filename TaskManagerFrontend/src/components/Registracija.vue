@@ -22,7 +22,7 @@
   
 <script setup>
 import axios from 'axios';
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
   
 const username = ref('');
 const password = ref('');
@@ -37,12 +37,12 @@ const register = async () => {
 
       const userId = response.data.userId;
       localStorage.setItem('userId', userId);
-      alert('Uspješna registracija');
+      alert('Uspjesna registracija');
       username.value = '';
       password.value = '';
       emit('close');
     } catch (error) {
-      alert('Neuspješna registracija: ' + error.response.data?.error || error.message);
+      alert('Neuspjesna registracija: ' + error.response.data?.error || error.message);
     }
 };
 
