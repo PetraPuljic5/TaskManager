@@ -21,13 +21,12 @@
 </template>
 
 <script setup>
-import axios from 'axios';
 import api from '../services/api';
 import { ref } from 'vue';
 
 const username = ref('');
 const password = ref('');
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'loginSuccess']);
 
 const register = async () => {
   try {
@@ -40,6 +39,7 @@ const register = async () => {
       alert('Uspješna registracija. Dobrodošli!');
       username.value = '';
       password.value = '';
+      emit('loginSuccess');
       emit('close');
     } else {
       alert('Registracija nije uspjela, token nije primljen.' + response.data.error);

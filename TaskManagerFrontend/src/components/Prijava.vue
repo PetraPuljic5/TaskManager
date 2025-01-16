@@ -20,38 +20,38 @@
     </div>
   </template>
   
-  <script setup>
-  import api from '../services/api';
-  import { ref } from 'vue';
+<script setup>
+import api from '../services/api';
+import { ref } from 'vue';
   
-  const username = ref('');
-  const password = ref('');
-  const emit = defineEmits(['close', 'loginSuccess']);
+const username = ref('');
+const password = ref('');
+const emit = defineEmits(['close', 'loginSuccess']);
   
-  const login = async () => {
+const login = async () => {
     try {
-      const response = await api.post('users/login', {
-        username: username.value,
-        password: password.value
-      });
-      if (response.data.token) {
-        localStorage.setItem('authToken', response.data.token);
-        alert('Prijava uspješna. Dobrodošli!');
-        emit('loginSuccess');
-        emit('close');
-      } else {
-        alert('Prijava nije uspjela, token nije primljen.');
-      }
+        const response = await api.post('users/login', {
+            username: username.value,
+            password: password.value
+        });
+        if (response.data.token) {
+            localStorage.setItem('authToken', response.data.token);
+            alert('Prijava uspješna. Dobrodošli!');
+            emit('loginSuccess');
+            emit('close');
+        } else {
+            alert('Prijava nije uspjela, token nije primljen.');
+        }
     } catch (error) {
-      console.log(error);
-      alert('Neuspješna prijava: ' + (error.response.data?.error || error.message));
+        console.log(error);
+        alert('Neuspješna prijava: ' + (error.response.data?.error || error.message));
     }
-  };
+};
   
-  const closeForm = () => {
+const closeForm = () => {
     emit('close');
-  };
-  </script>
-  <style scoped>
-  </style>
+};
+</script>
+<style scoped>
+</style>
   

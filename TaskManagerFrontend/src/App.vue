@@ -6,6 +6,7 @@ import Prijava from './components/Prijava.vue';
 import { ref, onMounted } from "vue";
 
 const tasks = ref([]);
+const isLoggedIn = ref(false);
 const showNoviTaskForm = ref(false);
 const showRegistracijaForm = ref(false);
 const showPrijavaForm = ref(false);
@@ -13,57 +14,72 @@ const noviTaskNaslov = ref("");
 const noviTaskOpis = ref("");
 const noviTaskTags = ref("");
 
-onMounted(() => {
+const handleLoginSuccess = () => {
+  isLoggedIn.value = true;
   fetchTasks();
+};
+
+onMounted(() => {
+  if (localStorage.getItem('authToken')) {
+    isLoggedIn.value = true;
+    fetchTasks();
+  }
 });
 
 const fetchTasks = async () => {
-    try {
-        const response = await api.get("/tasks");
-        tasks.value = response.data;
-    } catch (error) {
-        console.error("Greška u dohvaćanju zadataka", error);
-    }
+  try {
+    const response = await api.get("/tasks");
+    tasks.value = response.data;
+  } catch (error) {
+    console.error("Greška u dohvaćanju zadataka", error);
+  }
 };
 
 const addTask = async () => {
-    if (!noviTaskNaslov.value.trim() || !noviTaskOpis.value.trim()) {
-        alert("Naslov i opis su obavezni");
-        return;
-    }
+  if (!isLoggedIn.value) {
+    alert("Morate se registrirati ili prijaviti kako biste dodali zadatak");
+    showNoviTaskForm.value = false;
+    return;
+  }
 
-    const tagsArray = noviTaskTags.value.split(",").map(tag => tag.trim());
+  if (!noviTaskNaslov.value.trim() || !noviTaskOpis.value.trim()) {
+    alert("Naslov i opis su obavezni");
+    return;
+  }
 
-    try {
-        const response = await api.post("/tasks/novi", {
-            naslov: noviTaskNaslov.value,
-            opis: noviTaskOpis.value,
-            tags: tagsArray
-        });
-        tasks.value.unshift(response.data);
-        resetTaskForm();
-        showNoviTaskForm.value = false;
-    } catch (error) {
-        console.error("Greška u dodavanju zadatka", error);
-    }
+  const tagsArray = noviTaskTags.value.split(",").map(tag => tag.trim());
+
+  try {
+    const response = await api.post("/tasks/novi", {
+      naslov: noviTaskNaslov.value,
+      opis: noviTaskOpis.value,
+      tags: tagsArray
+    });
+    tasks.value.unshift(response.data);
+    resetTaskForm();
+    showNoviTaskForm.value = false;
+  } catch (error) {
+    console.error("Greška u dodavanju zadatka", error);
+  }
 };
 
 const resetTaskForm = () => {
-    noviTaskNaslov.value = "";
-    noviTaskOpis.value = "";
-    noviTaskTags.value = "";
+  noviTaskNaslov.value = "";
+  noviTaskOpis.value = "";
+  noviTaskTags.value = "";
 };
 
 const ukloniZadatak = (id) => {
-    tasks.value = tasks.value.filter(task => task._id.toString() !== id);
+  tasks.value = tasks.value.filter(task => task._id.toString() !== id);
 };
 
 const logout = () => {
-    localStorage.removeItem('authToken');
-    tasks.value = [];
-    showPrijavaForm.value = false;
-    showRegistracijaForm.value = false;
-    showNoviTaskForm.value = false;
+  localStorage.removeItem('authToken');
+  isLoggedIn.value = false;
+  tasks.value = [];
+  showPrijavaForm.value = false;
+  showRegistracijaForm.value = false;
+  showNoviTaskForm.value = false;
 };
 
 </script>
@@ -74,28 +90,46 @@ const logout = () => {
     <header class="flex justify-between items-center bg-white p-4 shadow rounded-md mb-6">
       <h1 class="text-2xl font-bold text-gray-800">Task Manager</h1>
       <div>
-        <button @click="showNoviTaskForm = true" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+        <button
+          v-if="isLoggedIn"
+          @click="showNoviTaskForm = true"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
           Dodaj zadatak
         </button>
-        <button @click="showRegistracijaForm = !showRegistracijaForm" class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+        <span
+          v-else
+          class="text-red-500 font-medium mr-2">
+          Prijavite se ili registrirajte za dodavanje zadatka.
+        </span>
+        <button
+          @click="showRegistracijaForm = !showRegistracijaForm"
+          class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
           Registriraj se
         </button>
-        <button @click="showPrijavaForm = !showPrijavaForm" class="ml-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+        <button
+          @click="showPrijavaForm = !showPrijavaForm"
+          class="ml-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
           Prijavi se
         </button>
-        <button @click="logout" class="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700">
+        <button
+          v-if="isLoggedIn"
+          @click="logout"
+          class="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700">
           Odjava
         </button>
       </div>
     </header>
 
-    <!-- Registration Form -->
-    <Registracija v-if="showRegistracijaForm" @close="showRegistracijaForm = false" />
+    <Registracija
+      v-if="showRegistracijaForm"
+      @close="showRegistracijaForm = false"
+      @loginSuccess="handleLoginSuccess" />
 
-    <!-- Login Form -->
-    <Prijava v-if="showPrijavaForm" @close="showPrijavaForm = false" @loginSuccess="fetchTasks" />
+    <Prijava
+      v-if="showPrijavaForm"
+      @close="showPrijavaForm = false"
+      @loginSuccess="handleLoginSuccess" />
 
-    <!-- New Task Form -->
     <div v-if="showNoviTaskForm" class="bg-white p-4 shadow rounded-md mb-6">
       <div class="mb-4">
         <label class="block text-gray-700 font-medium mb-2">Naslov zadatka:</label>
@@ -127,8 +161,7 @@ const logout = () => {
           :opis="task.opis"
           :tags="task.tags"
           :zavrsen="task.zavrsen"
-          @obrisiZadatak="ukloniZadatak"
-        />
+          @obrisiZadatak="ukloniZadatak" />
       </ul>
     </div>
   </div>
