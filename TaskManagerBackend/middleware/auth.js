@@ -6,6 +6,8 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const authMiddleware = async (req, res, next) => {
+  console.log('Authorization Header:', req.headers.authorization);
+
   try {
     let token = req.headers.authorization?.split(' ')[1];
 

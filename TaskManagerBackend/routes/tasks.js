@@ -9,7 +9,7 @@ router.get("/", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
-        const tasks = await collection.find({ userId: req.userId }).toArray();
+        const tasks = await collection.find({ userId: new ObjectId(req.userId) }).toArray();
 
         if (tasks.length === 0) {
             return res.status(404).json({ error: "Nema zadataka za ovog korisnika" });
@@ -22,7 +22,7 @@ router.get("/", authMiddleware, async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
@@ -46,14 +46,14 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
         const taskId = req.params.id;
 
         const result = await collection.updateOne(
-            { _id: new ObjectId(taskId) },
+            { _id: new ObjectId(taskId), userId: new ObjectId(req.userId) },
             { $set: { zavrsen: true } }
         );
 
@@ -68,13 +68,13 @@ router.patch("/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
         const taskId = req.params.id;
 
-        const result = await collection.deleteOne({ _id: new ObjectId(taskId) });
+        const result = await collection.deleteOne({ _id: new ObjectId(taskId), userId: new ObjectId(req.userId) });
 
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Nije pronadjen" });
@@ -87,13 +87,12 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.post("/novi", async (req, res) => {
+router.post("/novi", authMiddleware, async (req, res) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("tasks");
 
         const { naslov, opis, tags } = req.body;
-        const userId = req.body.userId;
 
         if (!naslov || !opis || !Array.isArray(tags)) {
             return res.status(400).json({ error: "Nedostaju podaci" });
@@ -104,7 +103,7 @@ router.post("/novi", async (req, res) => {
             opis,
             tags,
             zavrsen: false,
-            userId: new ObjectId(userId),
+            userId: new ObjectId(req.userId),
         };
 
         const result = await collection.insertOne(noviTask);

@@ -1,22 +1,29 @@
 <script setup>
+import api from './services/api';
 import axios from "axios";
 import Task from './components/Task.vue';
 import Registracija from './components/Registracija.vue';
+import Prijava from './components/Prijava.vue';
 import { ref, onMounted } from "vue";
 
 const tasks = ref([]);
 const showNoviTaskForm = ref(false);
 const showRegistracijaForm = ref(false);
+const showPrijavaForm = ref(false);
 const noviTaskNaslov = ref("");
 const noviTaskOpis = ref("");
 const noviTaskTags = ref("");
 
+onMounted(() => {
+    fetchTasks();
+});
+
 const fetchTasks = async () => {
     try {
-        const response = await axios.get("http://localhost:8000/tasks");
+        const response = await api.get("/tasks");
         tasks.value = response.data;
     } catch (error) {
-        console.error("Greška u dohvacanju", error);
+        console.error("Greška u dohvaćanju zadataka", error);
     }
 };
 
@@ -27,19 +34,12 @@ const addTask = async () => {
     }
 
     const tagsArray = noviTaskTags.value.split(",").map(tag => tag.trim());
-    const userId = localStorage.getItem("userId");
-
-    if (!userId) {
-        alert("Korisnik nije prijavljen");
-        return;
-    }
 
     try {
-        const response = await axios.post("http://localhost:8000/tasks/novi", {
+        const response = await api.post("/tasks/novi", {
             naslov: noviTaskNaslov.value,
             opis: noviTaskOpis.value,
-            tags: tagsArray,
-            userId: userId
+            tags: tagsArray
         });
         tasks.value.unshift(response.data);
         resetTaskForm();
@@ -59,9 +59,6 @@ const ukloniZadatak = (id) => {
     tasks.value = tasks.value.filter(task => task._id.toString() !== id);
 };
 
-onMounted(() => {
-    fetchTasks();
-});
 </script>
 
 <template>
@@ -76,11 +73,17 @@ onMounted(() => {
         <button @click="showRegistracijaForm = !showRegistracijaForm" class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
           Registriraj se
         </button>
+        <button @click="showPrijavaForm = !showPrijavaForm" class="ml-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+          Prijavi se
+        </button>
       </div>
     </header>
 
     <!-- Registration Form -->
     <Registracija v-if="showRegistracijaForm" @close="showRegistracijaForm = false" />
+
+    <!-- Login Form -->
+    <Prijava v-if="showPrijavaForm" @close="showPrijavaForm = false" />
 
     <!-- New Task Form -->
     <div v-if="showNoviTaskForm" class="bg-white p-4 shadow rounded-md mb-6">

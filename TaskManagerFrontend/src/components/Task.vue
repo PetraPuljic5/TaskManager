@@ -1,4 +1,5 @@
 <script setup>
+import api from '../services/api';
 import TaskTag from "./TaskTag.vue";
 import { ref } from "vue";
 
@@ -31,12 +32,8 @@ const isZavrsen = ref(props.zavrsen);
 
 const oznaciZavrsen = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/tasks/${props.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (response.ok) {
+    const response = await api.patch(`/tasks/${props.id}`, { zavrsen: true });
+    if (response.status === 200) {
       console.log("Oznacen kao dovrsen");
       isZavrsen.value = true;
     } else {
@@ -49,15 +46,11 @@ const oznaciZavrsen = async () => {
 
 const obrisiZadatak = async () => {
   if (!confirm("Zelite li obrisati zadatak?")) return;
-
   try {
-    const response = await fetch(`http://localhost:8000/tasks/${props.id}`, {
-      method: "DELETE",
-    });
-
-    if (response.ok) {
+    const response = await api.delete(`/tasks/${props.id}`);
+    if (response.status === 200) {
       console.log("Zadatak obrisan");
-      emit("obrisiZadatak", props.id); 
+      emit("obrisiZadatak", props.id);
     } else {
       console.error("Greska u brisanju zadatka");
     }

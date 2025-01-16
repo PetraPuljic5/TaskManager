@@ -25,16 +25,18 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const noviUser = {
+    const newUser = {
       username,
       password: hashedPassword
     };
 
-    const result = await users.insertOne(noviUser);
+    const result = await users.insertOne(newUser);
+    const token = jwt.sign({ userId: result.insertedId, username: username }, JWT_SECRET, { expiresIn: '24h' });
 
-    res.status(201).json({ 
-        message: 'Uspjesno registriran',
-        userId: result.insertedId
+    res.status(201).json({
+      message: 'Uspjesno registriran',
+      userId: result.insertedId,
+      token: token
     });
   } catch (error) {
     console.error('Greska u registraciji', error);
@@ -43,35 +45,46 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const db = await connectToDatabase();
-        const users = db.collection("users");
+  console.log('Pokretanje prijave za korisnika:', req.body.username);
 
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username i password su obavezni' });
-        }
+  try {
+      const { username, password } = req.body;
+      const db = await connectToDatabase();
+      const users = db.collection("users");
+      console.log('Baza podataka uspješno spojena.');
 
-        const user = await users.findOne({ username });
-        if (!user) {
-            return res.status(400).json({ error: 'Neispravno korisnicko ime ili lozinka' });
-        }
+      if (!username || !password) {
+          console.log('Nedostaju korisničko ime ili lozinka.');
+          return res.status(400).json({ error: 'Username i password su obavezni' });
+      }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: 'Neispravno korisnicko ime ili lozinka' });
-        }
+      const user = await users.findOne({ username });
+      if (!user) {
+          console.log('Korisnik nije pronađen:', username);
+          return res.status(400).json({ error: 'Neispravno korisnicko ime ili lozinka' });
+      }
 
-        const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
+      console.log('Korisnik pronađen:', username);
 
-        res.status(200).json({ 
-            message: 'Prijava uspjesna',
-            token
-        });
-    } catch (error) {
-        console.error('Greska u prijavi', error);
-        res.status(500).json({ error: 'Greska u prijavi' });
-    }
-})
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+          console.log('Neispravna lozinka za korisnika:', username);
+          return res.status(400).json({ error: 'Neispravno korisnicko ime ili lozinka' });
+      }
+
+      console.log('Lozinka valjana za korisnika:', username);
+
+      const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
+
+      console.log('Token uspješno generiran za korisnika:', username);
+      res.status(200).json({ 
+          message: 'Prijava uspjesna',
+          token
+      });
+  } catch (error) {
+      console.error('Greska u prijavi', error);
+      res.status(500).json({ error: 'Greska u prijavi' });
+  }
+});
 
 export default router;
