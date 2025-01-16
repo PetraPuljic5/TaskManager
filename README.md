@@ -107,3 +107,28 @@ Primjer:
 20. Implementirajte mogućnost dodavanja novog zadatka (frontend + backend). Dodajte novi zadatak u MongoDB kolekciju `tasks`. Poslužite se templateom definiranim u `App_primjer_s_dodavanjem.vue`
 
 <img src="https://github.com/lukablaskovic/TaskManager/blob/main/primjer_3.png?raw=true" style="width: 50%;">
+
+
+# + **Samostalni zadatak za vježbu 7**
+Nadogradite aplikaciju iz vježbe TaskManager tako da sadrži autentifikaciju i autorizaciju korisnika pomoću JWT tokena.
+
+1. Implementirajte registraciju korisnika na poslužiteljskoj strani, a na klijentskoj strani omogućite korisniku unos korisničkog imena i lozinke.
+2. Na poslužiteljskoj strani pohranite korisnika u Mongo bazu, a lozinku obvezno hashirajte prije pohrane.
+3. Za svaki zadatak u bazi podataka dodajte ključ `userId` koji će sadržavati ID korisnika koji je izradio taj zadatak (`userID` je podatak koji generira sam MongoDB)
+4. Na poslužiteljskoj strani implementirajte rutu za prijavu korisnika, gdje korisnik unosi korisničko ime i lozinku a dobiva potpisani JWT token koji traje 24 sata.
+5. Implementirajte autorizacijski middleware koji će se izvršiti prije rute za dohvaćanje svih zadataka. Nakon provjere ispravnosti JWT tokena, moraju biti vraćeni oni zadaci koji se odnose na autoriziranog korisnika. Ako token nije valjan ili ne postoje zadaci za tog korisnika, vratite odgovarajuću grešku.
+6. Na klijentskoj strani implementirajte pohranu JWT tokena u `localStorage` i slanje tokena u zaglavlju HTTP zahtjeva na svaku rutu koja zahtijeva autorizaciju, npr. dohvaćanje svih zadataka.
+7. Na poslužiteljskoj strani upotrijebite autorizacijski middleware i na ruti za dodavanje novog zadatka, gdje će se: prvo provjeriti valjanost JWT tokena, zatim pronaći korisnik ćiji se ID nalazi u tokenu (možete i prema korisničkom imenu) te naposlijetku dodati zadatak u bazu podataka
+
+_Primjer_: Ako korisnik 'anaAnic' dodaje novi zadatak, uz podatke o zadatku potrebno je poslati i header s JWT tokenom koji je generiran za korisnika 'anaAnic'. Na poslužitelju se provjerava valjanost tokena, pronalazi korisnik 'anaAnic' i dodaje zadatak u bazu podataka s ključem `userId` koji sadrži ID korisnika 'anaAnic'.
+
+```json
+{
+    id: 1,
+    userId: "64b67f9dc3a1d3c7e6a25f1b",
+    naslov: "Naučiti JWT",
+    opis: "Naučiti kako koristiti JWT token za autorizaciju korisnika",
+    zavrsen: false
+    tags: ["hitno", "faks"]
+}
+```
