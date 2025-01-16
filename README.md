@@ -122,7 +122,7 @@ Nadogradite aplikaciju iz vježbe TaskManager tako da sadrži autentifikaciju i 
 
 _Primjer_: Ako korisnik 'anaAnic' dodaje novi zadatak, uz podatke o zadatku potrebno je poslati i header s JWT tokenom koji je generiran za korisnika 'anaAnic'. Na poslužitelju se provjerava valjanost tokena, pronalazi korisnik 'anaAnic' i dodaje zadatak u bazu podataka s ključem `userId` koji sadrži ID korisnika 'anaAnic'.
 
-```json
+```javascript
 {
     id: 1,
     userId: "64b67f9dc3a1d3c7e6a25f1b",
