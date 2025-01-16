@@ -26,7 +26,7 @@
   
   const username = ref('');
   const password = ref('');
-  const emit = defineEmits(['close']);
+  const emit = defineEmits(['close', 'loginSuccess']);
   
   const login = async () => {
     try {
@@ -37,6 +37,7 @@
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token);
         alert('Prijava uspješna. Dobrodošli!');
+        emit('loginSuccess');
         emit('close');
       } else {
         alert('Prijava nije uspjela, token nije primljen.');
